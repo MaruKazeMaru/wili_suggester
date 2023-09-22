@@ -3,6 +3,7 @@ from rclpy.node import Node
 import numpy as np
 from numpy import ndarray
 from prob import rand_uniform_sinplex, calc_stat_dist, rand_unform_cube
+from wili_msgs.srv import GetSuggest
 
 class Suggester(Node):
     motion_num:int
@@ -13,7 +14,10 @@ class Suggester(Node):
     inv_var:list[ndarray]
     gauss_divs:list[float]
 
-    sample_num:int
+    barn_in:int
+    skip:int
+    noreject_sample_num:int
+    all_sample_num:int
     sample:ndarray
     dens_sample:ndarray
 
@@ -33,9 +37,14 @@ class Suggester(Node):
         self.gauss_divs = [2.0 * np.pi * det for det in dets]
         self.inv_var = [np.linalg.inv(v) for v in self.var_where_user]
 
-        self.sample_num = 500
-        self.sample = rand_unform_cube(self.motion_num, num=self.sample_num)
-        self.dens_sample = np.ones((self.sample_num,))
+        self.burn_in = 30
+        self.skip = 3
+        self.noreject_sample_num = 500
+        self.all_sample_num = self.burn_in + 1 + (self.noreject_sample_num - 1) * self.skip
+        self.sample = rand_unform_cube(self.motion_num, num=self.all_sample_num)
+        self.dens_sample = np.ones((self.all_sample_num,))
+
+        self.create_service(GetSuggest, 'get_suggest', self.suggest)
 
 
     def weight(self, miss_prob:ndarray) -> ndarray:
@@ -61,30 +70,28 @@ class Suggester(Node):
 
 
     def expectation(self, f, f_kwargs:dict={}) -> float | ndarray:
-        # theta:ndarray
-        # p = 0.0
-        # sample_update_num = sample_size * skip + burn_in
-        # sum_f = 0.0
-        # for i in range(sample_update_num):
-        #     theta_ = rand_uniform(self.dim)
-        #     p_ = self.prob_density(theta_)
-        #     #if (p_ >= 0.9999 * p) or (np.random.rand() * p > p_):
-        #     if (p_ >= p) or (np.random.rand() * p < p_):
-        #         p = p_
-        #         theta = theta_
+        p = -1.0
+        sum_f = 0.0
+        for i in range(self.all_sample_num):
+            p_ = self.dens_sample[i]
+            if (p_ >= p) or (np.random.rand() * p < p_):
+                p = p_
 
-        #     if (i >= burn_in) and ((i - burn_in) % skip == 0):
-        #         sum_f += f(theta, **f_kwargs)
-
-        # return sum_f / sample_size
+            if (i >= self.burn_in) and ((i - self.burn_in) % self.skip == 0):
+                sum_f += f(self.sample[i], **f_kwargs)
+        return sum_f / self.noreject_sample_num
 
 
     def update(self, where_found:ndarray) -> None:
-        exp_l = self.expectation(self.liklyhood, f_kwargs={"x":where_found})
-        for i in range(self.sample_num):
+        exp_l = np.dot(self.expectation(self.weight), self.gaussian(where_found))
+        for i in range(self.all_sample_num):
             self.dens_sample[i] = self.liklyhood(self.sample[:,i], x=where_found) * self.dens_sample[i]
         self.dens_sample /= exp_l
 
+
+    def suggest(self, req:GetSuggest.Request, res:GetSuggest.Response) -> GetSuggest.Response:
+        res.weight = self.expectation(self.weight)
+        return res
 
 
 def main():
