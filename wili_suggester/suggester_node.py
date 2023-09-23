@@ -11,18 +11,18 @@ class SuggesterNode(Node, suggester):
         Node.__init__(self, 'suggester')
         self.logger = self.get_logger()
 
-        suggester.__init__(self, 3)
+        suggester.__init__(self, 3) # 3 is for test
 
-        print(self.motion_num)
-        print(self.tr_prob)
-        print('[')
-        for i in range(self.motion_num):
-            print(self.avr_where_user[i])
-        print(']')
-        print('[')
-        for i in range(self.motion_num):
-            print(self.var_where_user[i])
-        print(']')
+        # print(self.motion_num)
+        # print(self.tr_prob)
+        # print('[')
+        # for i in range(self.motion_num):
+        #     print(self.avr_where_user[i])
+        # print(']')
+        # print('[')
+        # for i in range(self.motion_num):
+        #     print(self.var_where_user[i])
+        # print(']')
 
         self.create_service(GetSuggest, 'get_suggest', self.cb_suggest)
         self.sub_update = self.create_subscription(Where, 'where_found', self.cb_update, 10)

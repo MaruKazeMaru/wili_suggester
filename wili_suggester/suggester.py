@@ -22,7 +22,7 @@ class suggester:
     def __init__(self, motion_num:int, \
                     tr_prob:ndarray=None, init_prob:ndarray=None, \
                     avr_where_user:list[ndarray]=None, var_where_user:list[ndarray]=None, \
-                    burn_in=30, skip=3, noreject_sample_num=500 \
+                    sample_num = 200
                 ):
         # ~~~ HMM ~~~
         # node
@@ -66,12 +66,9 @@ class suggester:
         self.inv_var = [np.linalg.inv(v) for v in self.var_where_user]
 
         # ~~~ MCMC ~~~
-        self.burn_in = burn_in
-        self.skip = skip
-        self.noreject_sample_num = noreject_sample_num
-        self.all_sample_num = self.burn_in + 1 + (self.noreject_sample_num - 1) * self.skip
-        self.sample = rand_unform_cube(self.motion_num, num=self.all_sample_num)
-        self.dens_sample = np.ones((self.all_sample_num,))
+        self.sample_num = sample_num
+        self.sample = rand_unform_cube(self.motion_num, num=self.sample_num)
+        self.dens_sample = np.ones((self.sample_num,))
 
 
     def weight(self, miss_prob:ndarray) -> ndarray:
@@ -97,21 +94,15 @@ class suggester:
 
 
     def expectation(self, f, f_kwargs:dict={}) -> float | ndarray:
-        p = -1.0
-        sum_f = 0.0
-        for i in range(self.all_sample_num):
-            p_ = self.dens_sample[i]
-            if (p_ >= p) or (np.random.rand() * p < p_):
-                p = p_
-
-            if (i >= self.burn_in) and ((i - self.burn_in) % self.skip == 0):
-                sum_f += f(self.sample[:,i], **f_kwargs)
-        return sum_f / self.noreject_sample_num
+        sum_f = self.dens_sample[0] * f(self.sample[:, 0])
+        for i in range(1, self.sample_num):
+            sum_f += self.dens_sample[i] * f(self.sample[:, i])
+        return sum_f / self.sample_num
 
 
     def update(self, where_found:ndarray) -> None:
         exp_l = np.dot(self.expectation(self.weight), self.gaussian(where_found))
-        for i in range(self.all_sample_num):
+        for i in range(self.sample_num):
             self.dens_sample[i] = self.liklyhood(self.sample[:,i], x=where_found) * self.dens_sample[i]
         self.dens_sample /= exp_l
 
