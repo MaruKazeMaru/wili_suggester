@@ -3,22 +3,6 @@ from numpy import ndarray
 from .prob import rand_unform_cube, rand_uniform_sinplex, calc_stat_dist
 
 class Suggester:
-    motion_num:int
-    tr_prob:ndarray
-    init_prob:ndarray
-    avr_where_user:list[ndarray]
-    var_where_user:list[ndarray]
-    inv_var:list[ndarray]
-    gauss_divs:list[float]
-
-    burn_in:int
-    skip:int
-    noreject_sample_num:int
-    all_sample_num:int
-    sample:ndarray
-    dens_sample:ndarray
-
-
     def __init__(self, motion_num:int, \
                     tr_prob:ndarray=None, init_prob:ndarray=None, \
                     avr_where_user:list[ndarray]=None, var_where_user:list[ndarray]=None, \
@@ -65,7 +49,6 @@ class Suggester:
         self.gauss_divs = [2.0 * np.pi * det for det in dets]
         self.inv_var = [np.linalg.inv(v) for v in self.var_where_user]
 
-        # ~~~ MCMC ~~~
         self.sample_num = sample_num
         self.sample = rand_unform_cube(self.motion_num, num=self.sample_num)
         self.dens_sample = np.ones((self.sample_num,))
