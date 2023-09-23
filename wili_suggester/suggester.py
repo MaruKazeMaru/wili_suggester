@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2023 ShinagwaKazemaru
+# SPDX-License-Identifier: MIT License
+
 import numpy as np
 from numpy import ndarray
 from .prob import rand_unform_cube, rand_uniform_sinplex, calc_stat_dist

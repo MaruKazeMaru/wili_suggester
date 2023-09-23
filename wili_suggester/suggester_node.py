@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2023 ShinagwaKazemaru
+# SPDX-License-Identifier: MIT License
+
 import rclpy
 from rclpy.node import Node
 import numpy as np

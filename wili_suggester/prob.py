@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2023 ShinagwaKazemaru
+# SPDX-License-Identifier: MIT License
+
 import numpy as np
 from numpy import ndarray
 
