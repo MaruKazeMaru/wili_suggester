@@ -2,7 +2,7 @@ import numpy as np
 from numpy import ndarray
 from .prob import rand_unform_cube, rand_uniform_sinplex, calc_stat_dist
 
-class suggester:
+class Suggester:
     motion_num:int
     tr_prob:ndarray
     init_prob:ndarray

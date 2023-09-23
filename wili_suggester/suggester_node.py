@@ -4,14 +4,14 @@ import numpy as np
 from wili_msgs.msg import Where
 from wili_msgs.srv import GetSuggest
 from .prob import rand_uniform_sinplex, calc_stat_dist, rand_unform_cube
-from .suggester import suggester
+from .suggester import Suggester
 
-class SuggesterNode(Node, suggester):
+class SuggesterNode(Node, Suggester):
     def __init__(self):
         Node.__init__(self, 'suggester')
         self.logger = self.get_logger()
 
-        suggester.__init__(self, 3) # 3 is for test
+        Suggester.__init__(self, 3) # 3 is for test
 
         # print(self.motion_num)
         # print(self.tr_prob)
