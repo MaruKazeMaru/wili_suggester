@@ -5,7 +5,7 @@ from numpy import ndarray
 from prob import rand_uniform_sinplex, calc_stat_dist, rand_unform_cube
 from wili_msgs.srv import GetSuggest
 
-class Suggester(Node):
+class SuggesterNode(Node):
     motion_num:int
     tr_prob:ndarray
     init_prob:ndarray
@@ -96,7 +96,7 @@ class Suggester(Node):
 
 def main():
     rclpy.init()
-    node = Suggester()
+    node = SuggesterNode()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
