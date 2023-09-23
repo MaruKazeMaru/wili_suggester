@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'suggester=wili_suggester.suggester:main'
+            'suggester=wili_suggester.suggester_node:main'
         ],
     },
 )
