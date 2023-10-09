@@ -37,7 +37,7 @@ class Suggester:
             R = np.array([[c, -s], [s, c]])
             self.avr_where_user = []
             for i in range(self.motion_num):
-                self.avr_where_user.append(v)
+                self.avr_where_user.append(2.0 * v)
                 v = R @ v
         else:
             self.avr_where_user = avr_where_user

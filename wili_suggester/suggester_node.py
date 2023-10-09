@@ -7,7 +7,7 @@ import rclpy
 from rclpy.node import Node
 import numpy as np
 from wili_msgs.msg import Where
-from wili_msgs.srv import GetSuggest
+from wili_msgs.srv import Suggest
 from .prob import rand_uniform_sinplex, calc_stat_dist, rand_unform_cube
 from .suggester import Suggester
 
@@ -29,8 +29,8 @@ class SuggesterNode(Node, Suggester):
         #     print(self.var_where_user[i])
         # print(']')
 
-        self.create_service(GetSuggest, 'get_suggest', self.cb_suggest)
-        self.sub_update = self.create_subscription(Where, 'where_found', self.cb_update, 10)
+        self.create_service(Suggest, 'suggest', self.cb_suggest)
+        # self.sub_update = self.create_subscription(Where, 'where_found', self.cb_update, 10)
 
         self.logger.info('start')
 
@@ -42,9 +42,11 @@ class SuggesterNode(Node, Suggester):
         self.logger.info('updated')
 
 
-    def cb_suggest(self, req:GetSuggest.Request, res:GetSuggest.Response) -> GetSuggest.Response:
+    def cb_suggest(self, req:Suggest.Request, res:Suggest.Response) -> Suggest.Response:
+        self.logger.info('suggesting...')
+        res.motion_num = self.motion_num
         res.weight = self.suggest().tolist()
-        self.logger.info('{}'.format(res.weight))
+        self.logger.info('suggest complete')
         return res
 
 
